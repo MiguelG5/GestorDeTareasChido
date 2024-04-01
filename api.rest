@@ -1,0 +1,41 @@
+###
+GET http://localhost:3000/users
+###
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+    "username": "Marisol",
+    "password": "123456",
+    "role": "raeder"
+}
+
+###
+GET http://localhost:3000/users/1
+
+###
+PUT http://localhost:3000/users/1
+Content-Type: application/json
+
+{
+    "username": "Miguel Garcia",
+    "password": "1hjghfds6",
+    "role": "Admnnin"
+}
+
+###
+DELETE http://localhost:3000/users/2
+
+
+###
+//PARA EL LOGIN
+
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "username": "Miguel Garcia",
+    "password": "123456"
+}
+
+//Me quede en 1:18 del primer video
