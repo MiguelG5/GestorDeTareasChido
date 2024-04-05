@@ -7,7 +7,13 @@ export class UserController {
 
     static getAll = async(req: Request, res: Response) =>{
         const userRepository = getRepository(User);
-        const users = await userRepository.find();
+        let users;
+        try{
+            users = await userRepository.find();
+        }catch(e){
+            res.status(404).json({message: "Puede que sea peligroso"});
+        }
+        
 
         if (users.length > 0 ){
             res.send(users);

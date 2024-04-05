@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { User } from "../entity/User";
 import * as jwt from "jsonwebtoken";
 import config from "../config/config";
+import { validate } from "class-validator";
 
 class AuthController {
     static login = async (req: Request, res: Response) => {
@@ -13,9 +14,10 @@ class AuthController {
         }
 
         const userRepository = getRepository(User);
+        let user: User; // Declaración de la variable fuera del bloque try
 
         try {
-            const user = await userRepository.findOne({ where: { username: username } });
+            user = await userRepository.findOne({ where: { username: username } });
             if (!user) {
                 return res.status(400).json({ message: "Nombre de usuario o contraseña incorrectos" });
             }
@@ -35,6 +37,41 @@ class AuthController {
             return res.status(500).json({ message: "Error interno del servidor" });
         }
     };
+    static changePassword= async(req: Request, res: Response )=>{
+        const {userId} = res.locals.jwtPayload;
+        const {oldPassword, newPassword}= req.body;
+
+        if(!(oldPassword && newPassword)){
+            res.status(400).json({message:"La contraseña antigua y la nueva son requeriadas"})
+
+        }
+
+        const userRepository = getRepository(User);
+        let user: User;
+
+        try{
+            user = await userRepository.findOneByOrFail(userId);
+        }
+        catch (e){
+            res.status(400).json({message: "Error"});
+        }
+
+        if(!user.checkPassword(oldPassword)){
+            return res.status(401).json({message: "checa tu vieja contraseña"});
+        }
+        user.password = newPassword;
+        const validationOps={validationError:{target: false, value: false}};
+        const errors = await validate(user, validationOps)
+
+        if(errors.length > 0){
+            return res.status(400).json(errors);
+        }
+
+        user.hashPassword();
+        userRepository.save(user);
+
+        res.json({ message: "Su contraseña se cambio con exito"})
+    }
 }
 
 export default AuthController;
