@@ -1,6 +1,8 @@
 import { getRepository } from "typeorm";
 import { Request, Response } from "express";
 import { User } from "../entity/User";
+import * as jwt from "jsonwebtoken";
+import config from "../config/config";
 
 class AuthController {
     static login = async (req: Request, res: Response) => {
@@ -23,8 +25,11 @@ class AuthController {
                 return res.status(400).json({ message: "Usuario o contraseña incorrectos" });
             }
 
-            // Si la contraseña es correcta, enviar el usuario
-            res.send(user);
+            // Generar token JWT
+            const token = jwt.sign({ userId: user.id, username: user.username }, config.jwtSecret, { expiresIn: "1h" });
+
+            // Si la contraseña es correcta, enviar el usuario y el token
+            res.json({message: "OK", token});
         } catch (e) {
             console.error("Error al intentar iniciar sesión:", e);
             return res.status(500).json({ message: "Error interno del servidor" });
@@ -32,6 +37,4 @@ class AuthController {
     };
 }
 
-
 export default AuthController;
-
